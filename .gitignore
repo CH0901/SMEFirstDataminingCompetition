@@ -3,14 +3,19 @@ apikey.txt
 .env
 .claude/
 
-# ── 가상환경 (재생성 가능, 464MB) ──────────────────────
+# ── 가상환경·빌드 산출물 (재생성 가능) ─────────────────
 .venv/
 venv/
 __pycache__/
 *.pyc
+*.egg-info/
+build/
+dist/
+.ipynb_checkpoints/
 
 # ── 대용량 모델 (GitHub 파일당 100MB 제한 초과) ────────
-#    train.py 로 재생성 가능. 제출본 model.pkl 은 별도 보관 필요.
+#    python -m sme.model.train 으로 재생성 가능.
+#    단 제출본 model.pkl 은 재현 보장이 없으므로 별도 보관할 것.
 *.pkl
 
 # ── 중복본 (대회제출_20260823/ 폴더와 내용 동일) ───────

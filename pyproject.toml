@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sme-first-datamining-competition"
+version = "1.0.0"
+description = "GK2A 정지위성 관측만으로 전국 96개 지점의 14시 기온·습도를 예측한다"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "requests", "numpy", "pandas", "pyarrow",
+    "netCDF4", "h5py", "pyproj", "scikit-learn", "lightgbm",
+]
+
+[project.optional-dependencies]
+notebook = ["jupyter", "ipykernel", "nbconvert"]
+slides = ["python-pptx"]
+
+[tool.setuptools.packages.find]
+include = ["sme*"]
