@@ -1,0 +1,1022 @@
+ 
+ 
+ 
+ 
+GK-2A AMI 
+Algorithm Theoretical Basis 
+Document 
+ 
+LST (Land Surface 
+Temperature) 
+ 
+ 
+개발자 정보 
+서명석 공주대학교 
+최윤영 공주대학교 
+ 
+ 
+Version 1.0 
+2019. 06. 15. 
+ 
+ 
+
+<수정 이력>  
+문서 
+버전 수정내용 과학코드 
+버전 수정일 작성자 
+0.1 국가기상위성센터 가이드라인에 따른 
+ATBD 초안 작성 
+(COMS/MI 자료를 이용한 버전) 
+0.1.0.0 2015. 03. 30 서명석 
+최윤영 
+0.2 1차 전문가 검토위원회의 질의응답 
+및 의견을 반영한 ATBD 수정 
+(COMS/MI 자료를 이용한 버전) 
+0.2.0.0 2016. 11.18 서명석 
+최윤영 
+0.3 국가기상위성센터 새 가이드라인에 
+따른 ATBD 수정 
+0.3.0.0 2017. 01. 07 서명석 
+최윤영 
+0.4 ATBD 전반적인 수정 
+2차 전문가 검토위원회 질의응답 및 
+의견을 반영 
+(Himawari-8/AHI 자료를 이용) 
+0.4.4.1 2017. 11. 17 서명석 
+최윤영 
+0.5 3차 전문가 검토위원회 질의응답 및 
+의견을 반영한 ATBD 수정 
+(Himawari-8/AHI 자료를 이용) 
+0.5.0.0 2018. 01. 15 서명석 
+최윤영 
+0.6 4차 전문가 검토위원회 질의응답 및 
+의견을 반영한 ATBD 수정 
+(Himawari-8/AHI 자료를 이용) 
+0.5.4.1 2018. 11. 19 서명석 
+최윤영 
+1.0 국가기상위성센터 ATBD 개선 필요
+사항 및 새로운 국문 템플릿을 반영
+한 ATBD 수정 
+(Himawari-8/AHI 자료를 이용) 
+0.5.4.3 2019. 06. 15 서명석 
+최윤영 
+ 
+ 
+ 
+ 
+ 
+  
+<목차> 
+1. 개요 ......................................................................................................................................................................... 1 
+1.1 목적 ............................................................................................................................................ 1 
+1.2 사용자 ........................................................................................................................................ 1 
+1.3 내용 ............................................................................................................................................ 1 
+1.4 관련 문서 .................................................................................................................................. 1 
+2. 알고리즘 소개 ..................................................................................................................................................... 3 
+2.1 개요 ............................................................................................................................................ 3 
+2.2 알고리즘 흐름도 ...................................................................................................................... 3 
+2.3 입력자료 .................................................................................................................................... 4 
+2.3.1 L1B ......................................................................................................................................................... 4 
+2.3.2 L2 ............................................................................................................................................................. 5 
+2.3.3 보조 자료 ............................................................................................................................................. 5 
+2.4 이론적 배경 .............................................................................................................................. 6 
+2.4.1 복사전달모델 모의 및 과정......................................................................................................... 9 
+2.5 수학적 설명 ............................................................................................................................ 11 
+2.6. 복사전달모델(MODTRAN4) 모의 결과 ......................................................................... 13 
+2.7. 산출물 ..................................................................................................................................... 15 
+3. 모의자료 및 검증 ........................................................................................................................................... 18 
+3.1 모의 입력자료 및 검증자료 ................................................................................................ 18 
+3.2 검증 방법 ................................................................................................................................ 18 
+3.3 검증 결과 ................................................................................................................................ 19 
+4. 현업운영 시 고려사항 .................................................................................................................................. 26 
+4.1 수치계산 고려사항 ................................................................................................................ 26 
+4.2 프로그래밍 및 절차상의 고려사항..................................................................................... 26 
+4.3 품질 평가 및 진단 ................................................................................................................ 26 
+4.4 예외사항 처리 ........................................................................................................................ 26 
+4.5 검증 알고리즘 ........................................................................................................................ 26 
+5. 가정 및 제한 .................................................................................................................................................... 27 
+5.1 성능 .......................................................................................................................................... 27 
+5.2 예상 센서 성능 ...................................................................................................................... 27 
+5.3 개선을 위한 사전 계획 ........................................................................................................ 27 
+6. 참고문헌 ............................................................................................................................................................. 28 
+ 
+  
+<표 목차> 
+Table 2.1. GK-2A/AMI primary sensor data used in the LST algorithm.  ·············· 5 
+Table 2.2. GK-2A/AMI derived sensor data used in the LST algorithm. ················ 5 
+Table 2.3. GK-2A/AMI ancillary data used in the LST algorithm. ······················· 6 
+Table 2.4. Input conditions of the radiative transfer model simulations. ··············· 11 
+Table 2.5. Summary of the LST retrieval equations according to the BTD ranges. The number 
+indicates the equation number in the text.  ····································· 12 
+Table 2.6. LST retrieval algorithm output data.  ·········································· 16 
+Table 3.1. Comparison results of Himawari-8 LST data and MODIS LST product (collection 
+6) for months (November 2016, January, April, and July 2017). ··········· 24 
+ 
+ 
+ 
+  
+<그림 목차> 
+Fig. 2.1. Flow chart for the development and retrieval process of LST from GK-2A/AMI. 4 
+Fig. 2.2. Diurnal variation of air temperature and LST  in the atmospheric vertical profiles 
+(blue line: SeeBor profile, red line: diurnal variation of profiles, yellow arrow: 
+diurnal variation of air temperature, green arrow: diurnal variation of LST).  
+ ························································································ 10 
+Fig. 2.3. Distribution of RMSEs between LST calculat ed from RTM simulated brightness 
+temperature and reference LST according to different impacting factors: (a) 
+brightness temperature differences (BTD) and surface lapse rate; (b) emissivity 
+differences (∆ε) and BTD; (c) satellite viewing zenith angle (VZA) and BTD.
+ ························································································ 13 
+Fig. 2.4. (a) Scatter plot (left) and (b) histogram (right) of difference between the reference 
+LST and estimated LST using Himawari-8 LST retrieval algorithm. ······ 14 
+Fig. 2.5. Distribution of RMSEs for the LST retrieval algorithms based on the different 
+impacting factors: (a) BTD and surface lapse rate; (b) ∆ε and BTD; (c) ∆ε and surface 
+lapse rate; (d) VZA and BTD; (e) VZA and surface lapse rate. ············· 15 
+Fig. 2.6. Sample images of the GK -2A land surface temperature from GK -2A full disk scan 
+data for the selected day (June 5, 2019, 0230 UTC).·························· 17 
+Fig. 3.1. (a) Spatial distribution of Himawari-8 LST (top left), (b) MODIS LST (top right), (c) 
+their differences (bottom left) and (d) scatter plot (bottom right) for the selected day 
+(Nov. 21, 2016, 1300 UTC). ······················································ 20 
+Fig. 3.2. Same as Fig. 3.1 except for the selected day (Jan. 25, 2017, 0300 UTC). ·· 21 
+Fig. 3.3. Same as Fig. 3.1 except for the selected day (Apr. 5, 2017, 0100 UTC). ··· 22 
+Fig. 3.4. Same as Fig. 3.1 except for the selected day (Jul. 6, 2017, 1800 UTC). ···· 23 
+Fig. 3.5. Scatter plot between Himawari -8 LST and Tateno station from upward longwave 
+radiation (red square symbol: daytime; blue circle symbol: nighttime). ··· 24 
+Fig. 3.6. Scatter plot between Himawari -8 LST and Boseong observatory from (a) 2.6 m 
+upward longwave radiation and (b) 60m upward longwave radiation. ····· 25 
+  
+약어표 
+Acronyms 
+AHI Advanced Himawari Imager 
+AMI Advanced Meteorological Imager 
+ATBD Algorithm Theoretical Basis Document 
+BSRN Baseline Surface Radiation Network 
+BTD Brightness Temperature Difference 
+GK-2A GeoKompsat-2 Atmosphere 
+HITRAN High Resolution Transmission 
+IR Infrared 
+KMA Korea Meteorological Administration 
+LOWTRAN Low Resolution Transmission 
+LST Land Surface Temperature 
+MODIS Moderate Resolution Imaging Spectroradiometer 
+MODTRAN Moderate resolution atmospheric transmission 
+NDVI Normalized Difference Vegetation Index 
+NMSC National Meteorological Satellite Center 
+RMSE Root Mean Square Error 
+RTM Radiative Transfer Model 
+SLSTR Sea and Land Surface Temperature Instrument 
+SoZA Solar Zenith Angle 
+SST Sea Surface Temperature 
+SZA Satellite Zenith Angle 
+USAF United State Air Force 
+VCM Vegetation Cover Method 
+VIIRS Visible Infrared Imaging Radiometer Suite  
+ 
+1 
+ 
+1. 개요 
+1.1 목적 
+본 문서는 정지궤도 기상위성 GK-2A/AMI(GeoKompsat-2 Atmosphere/Advanced 
+Meteorological Imager) 자료로부터 지표면온도(land surface temperature: LST)를 산
+출하는 알고리즘 기술 분석서 version 1.0이다. 본 문서는 지표면온도 산출의 이론적 배
+경에서부터 산출자료의 특성에 이르기까지 상세한 내용을 제공하는데 목적이 있으며 
+GK-2A/AMI Level 1B 자료로부터 지표면온도를 산출하는 과정, 산출물 그리고 산출물
+의 품질까지 기술하였다. 또한 GK-2A/AMI 자료로부터 지표면온도를 산출하는데 사용
+되는 여러 계산과정과 다양한 보조 자료에 대한 설명 또한 포함되어 있다. AMI 는 후속 
+정지궤도 기상위성 GK-2A에 탑재된 광학 영상기로서 가시에서부터 적외 영역에 이르
+기까지 16개의 채널을 포함한 센서이다. 
+ 
+1.2 사용자 
+이 문서의 사용자는 일차적으로 위성자료로부터 지표면온도를 산출하는 이론적 배경이나 
+알고리즘 개선에 관심이 있는 알고리즘 개발 연구자이고 이차적으로는 위성으로부터 산
+출한 지표면온도를 다른 응용분야에 활용할 사용자들이다. 
+ 
+1.3 내용 
+이 문서는 GK-2A/AMI Level -1B 자료로부터 지표면온도를 산출하는 이론적 배경을 
+제시하는 것으로 크게 다음과 같은 내용을 포함하고 있다. 
+- 개요: 지표면온도 산출 알고리즘의 목적, AMI 센서의 특성, 그리고 산출물에 대한 간
+단한 기술 
+- 알고리즘 소개: 지표면온도 산출에 필요한 입력 자료에서부터 이론적 배경 그리고 최
+종 산출물에 대한 소개 
+- 가정과 한계: 지표면온도 산출 알고리즘의 개발과정에 필요한 가정과 현 알고리즘의 
+한계에 대한 소개 
+ 
+1.4 관련 문서 
+- NMSC, 2015, 영상 장면분석/표면 분야 알고리즘 개발 (1) 연차보고서 
+2 
+ 
+- NMSC, 2016, 영상 장면분석/표면 분야 알고리즘 개발 (2) 연차보고서 
+- NMSC, 2017, 영상 장면분석/표면 분야 알고리즘 개발 (3) 연차보고서 
+- NMSC, 2017, 영상 장면분석/표면 분야 알고리즘 개발 (4) 연차보고서 
+- NMSC, 2018, 영상 장면분석/표면 분야 알고리즘 개발 (5) 연차보고서 
+- NMSC, 2018, GEO-KOMPSAT 2A Land Surface Emissivity Algorithm Theoretical 
+Basis Document 
+  
+3 
+ 
+2. 알고리즘 소개 
+본 장에서는 현재 수준의 개발된 알고리즘에 대한 자세한 내용을 기술하였다. 
+2.1 개요 
+GK-2A/AMI 지표면온도 산출 알고리즘은 GK-2A/AMI의 기본 산출물 중 하나로서 동
+아시아 및 GK-2A/AMI의 관측 지역에서의 지표면온도를 정량적으로 산출하기 위한 것
+이다. 본 알고리즘은 지표면 방출율을 미리 알고 있으며 대기의 흡수는 분리대기창 기법
+을 통해 보정될 수 있다는 가정을 한다. 또한 경계층 아래의 기온의 일 변동, 지표면 방
+출율, 대기 중 수증기량, 위성 천정각 등 다양한 영향을 알고리즘에 고려하였다. 다양한 
+조건들(대기 프로파일, 방출율 등)이 고려된 지표면온도 모의자료를 생성하기 위해 복사
+전달모델 모의를 실시하였다. 지표면온도 산출 알고리즘의 계수는 주간과 야간에 대해 
+각각 건조/보통/습윤 조건으로 나누어 구축된 지표면온도 모의자료를 사용하여 회귀 방
+법으로 도출하였다. 지표면온도 산출 알고리즘의 산출 수준은 복사전달모델에 처방된 지
+표면온도를 이용하여 평가하였으며 최종 검증은 MODIS (Moderate Resolution Imaging 
+Spectroradiometer) 지표면온도 및 현장관측 자료를 이용하였다. 
+ 
+2.2 알고리즘 흐름도 
+본 연구에서 개발한 지표면온도 알고리즘은 Fig. 2.1과 같이 크게 세 개의 부분으로 구
+성되어 있다. 첫 번째 단계는 GK-2A/AMI 관측 지역의 다양한 대기/지면 상태 조건이 
+포함되도록 복사전달모델 모의 조건을 설계한다. 다음으로 설계된 모의 조건을 복사전달
+모델에 적용하여 복사전달 모의 자료를 구축하는 부분이다. 두 번째 단계는 구축된 모의
+자료에 분리대기창 기법을 적용하여 기온 감률(2 종류)과 대기 상태(3 종류)에 따라 주
+간과 야간에 대해 습윤/보통/건조 조건으로 나누어 여섯 개의 산출 식을 개발하는 부분
+이다. 위성 자료와 보조 자료들을 읽은 후 각 조건별로 산출 식을 통해 지표면온도를 산
+출한다. 세 번째 단계는 개발된 산출 알고리즘을 위성 자료에 적용하여 지표면온도를 산
+출한다. 이 때 산출된 지표면온도는 충분히 제거되지 않은 구름에 의해 비정상적으로 낮
+은 값으로 지표면온도가 산출될 수 있으므로 이를 제거하는 과정(후처리)이 수행된다. 
+마지막 단계는 산출된 지표면온도의 정확도 평가로 지상관측자료 또는 MODIS 지표면온
+도와 같이 품질이 보장된 다른 위성자료를 이용하여 정량적으로 검증을 실시한다. 
+ 
+4 
+ 
+ 
+2.3 입력자료 
+이 절에서는 GK-2A/AMI 자료를 사용하여 지표면온도를 산출하는 과정에 필요한 입력 
+자료의 특성을 기술하였다. 알고리즘 입력 자료는 GK-2A/AMI의 Level-1B 자료, 선
+행 산출물, 그리고 보조 자료가 있다. 
+2.3.1 L1B 
+지표면온도를 산출하기 위해 GK-2A/AMI의 채널 13번과 채널 15번을 사용하며 공간
+해상도는 2 km, 관측주기는 10 분이다. 두 채널의 특징을 Table 2.1에 나타냈다. 
+  
+Fig. 2.1. Flow chart for the development and retrieval process of LST from GK-2A/AMI. 
+
+5 
+ 
+Table 2.1. GK-2A/AMI primary sensor data used in the LST algorithm. 
+Channel Type 
+Center 
+Wavelength 
+(um) 
+Spatial 
+resolution 
+(km) 
+Temporal 
+resolution 
+(minutes) 
+Description Use 
+13 IR 10.3539 2 10  AMI Channel 13 
+TOA radiance 
+Split-window 
+algorithm input data 
+15 IR 12.3651 2 10 AMI Channel 15 
+TOA radiance 
+Split-window 
+algorithm input data 
+ 
+2.3.2 L2 
+지표면온도는 청천인 육지 화소에 대해서만 산출되기 때문에 구름탐지 산출물이 선행자
+료로 필요하다. 구름 탐지 산출물은 공간해상도가 2 km 이며 산출주기는 10분이다. 또한 
+지표면온도를 산출하기 위해 사용된 분리대기창 기법에서는 지표면 방출율을 알고 있다
+는 가정을 하므로 두 적외 채널의 지표면 방출율 자료가 필요하다. 지표면 방출율은 공
+간해상도가 2 km 이며 산출주기는 1일이다. 지표면온도 산출에 필요한 L2 자료의 특징
+을 Table 2.2에 나타냈다. 
+Table 2.2. GK-2A/AMI derived sensor data used in the LST algorithm. 
+Name Spatial 
+resolution (km) 
+Temporal 
+resolution Description Use 
+Cloud 
+detection 2 10 minutes AMI cloud mask data Distinguish clear pixel 
+Land surface 
+emissivity 
+channel 13 
+2 1 day AMI Land Surface 
+Emissivity channel 13 
+Split-window algorithm 
+input data 
+Land surface 
+emissivity 
+channel 15 
+2 1day AMI Land Surface 
+Emissivity channel 15 
+Split-window algorithm 
+input data 
+ 
+2.3.3 보조 자료 
+지표면온도를 산출하기 위해 필요한 보조 자료는 크게 정적 자료와 동적 자료로 나뉜다. 
+정적 입력 보조 자료는 청천인 육지 화소에 대해서만 지표면온도가 산출되므로 육지/해
+양 구분 자료가 필요하며 각 산출 식 조건에 따른 지표면온도 산출 계수 및 각 화소에 
+대한 위치정보(위도, 경도) 자료이다. 동적 입력 보조 자료는 주간과 야간을 구분하기 
+위한 태양 천정각과 지표면온도 산출식의 입력변수로 들어가는 위성 천정각이 있다. 보
+조자료의 특징은 Table 2.3과 같다. 
+  
+6 
+ 
+Table 2.3. GK-2A/AMI ancillary data used in the LST algorithm. 
+Name Description Use 
+Land/Sea mask Land/Sea mask of each pixel Distinguish land pixel 
+Coefficients of LST 
+retrieval equations 
+Coefficients of LST retrieval algorithm 
+(Day: Dry/Normal/Wet) 
+(Night: Dry/Normal/Wet) 
+Calculate LST 
+Spectral emissivity 
+look-up table 
+Spectral emissivity look-up table of AMI 
+channel 13 and 15 
+Calculate land surface 
+emissivity 
+Land use/cover data Land use/cover of each pixel Calculate land surface 
+emissivity 
+ 
+2.4 이론적 배경 
+적외 영역의 복사전달방정식은 지면에서 방출되는 복사에너지와 대기와의 상호작용에 의
+해 결정된다. 열역학적 온도 𝑇𝑠의 지면에서 파장이 𝜆일 때 방출되는 복사량은 플랑크 함
+수에 방출율 𝜀(𝜆)를 곱해 식 (2.1)과 같이 표현할 수 있다. 
+𝐿(𝜆, 𝑇) = 𝜀(𝜆)𝐵(𝜆, 𝑇𝑠)         (2.1) 
+ 
+일반적으로 전자기파가 대기를 통과하는 천정각이 𝜃(𝜇 = cos(𝜃))일 때 흡수, 방출, 산란
+이 포함된 복사량은 복사전달 방정식(Schwarzschild 방정식)으로 표현할 수 있으며 식 
+(2.2)와 같다. 
+𝜇
+𝑑𝐿𝜆
+𝑑𝛿𝜆
+= −𝐿𝜆(𝜃, 𝜙) + 𝐵𝜆(𝑇)        (2.2) 
+ 
+식 (2.2)에서 양 변에 적분인자 
+exp⁡(𝛿𝜆/𝜇)
+𝜇  를 곱하고 정리하면 식 (2.3)과 같다. 
+𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 )
+𝑑𝐿𝜆
+𝑑𝛿𝜆
++
+1
+𝜇 𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐿𝜆(𝜃, 𝜙) =
+1
+𝜇 𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐵𝜆(𝑇)       (2.3) 
+ 
+좌 항을 완전 미분 형태로 정리하면 식 (2.4)와 같다. 
+𝑑𝐿𝜆
+𝑑𝛿𝜆
+[𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐿𝜆(𝜃, 𝜙)] =
+1
+𝜇 𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐵𝜆(𝑇)          (2.4) 
+ 
+여기에 광학두께 𝛿𝜆를 연직좌표로 𝛿𝜆 = 0을 지표면, 𝛿𝜆 = 𝛿0 를 위성이라고 가정한 후 양
+변을 지표면부터 위성까지 적분하면 식 (2.5)와 같다. 
+ 
+7 
+ 
+∫
+𝑑𝐿𝜆
+𝑑𝛿𝜆
+[𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐿𝜆(𝜃, 𝜙)]
+𝛿0
+0 = ∫ 𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐵𝜆(𝑇)
+𝑑𝛿𝜆
+𝜇
+𝛿0
+0   
+𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐿𝜆 − 𝐿0 = ∫ 𝑒𝑥𝑝 (
+𝛿𝜆
+𝜇 ) 𝐵𝜆(𝑇)
+𝛿0
+0
+𝑑𝛿𝜆
+𝜇         (2.5) 
+ 
+여기서 𝐿𝜆는 위성에 도달하는 복사휘도, 𝐿0는 지표면에서 방출한 복사 휘도로 𝐿𝜆에 대해 
+정리하면 식 (2.6)과 같다. 
+𝐿𝜆 = 𝐿0𝑒𝑥𝑝 (−
+𝛿𝜆
+𝜇 ) + ∫ 𝑒𝑥𝑝 (−
+(𝛿𝜆−𝛿𝜆)
+𝜇 ) 𝐵𝜆(𝑇)
+𝛿0
+0
+𝑑𝛿𝜆
+𝜇        (2.6) 
+ 
+탑재된 센서에 도달하는 파장 별 복사량은 지면에서 복사된 복사 휘도에 지표면부터 위
+성까지의 투과율을 곱한 값과 대기의 각 층에서 방출된 복사휘도의 기여량으로 표현된다. 
+여기서 지면이 흑체가 아니기 때문에 지면에서 방출된 복사 휘도는 지면에서의 상향 복
+사량과 대기에서의 하향복사의 반사량의 합으로 표현할 수 있다. 지면에서 방출된 복사
+량은 지표면온도와 방출율의 함수로 식 (2.6)을 풀어 쓰면 식 (2.7)과 같다(McMillin, 
+1975). 
+𝐿𝜆 = [𝜀𝜆𝐵𝜆(𝑇𝑠) + (1 − 𝜀𝜆)𝐿𝜆
+𝑑]𝜏𝜆 + 𝐿𝜆
+𝑎        (2.7) 
+ 
+식 (2.7)에서 𝐿𝜆 는 위성에서 측정되는 파장 별 복사휘도를, 𝐿𝜆
+𝑑 와 𝐿𝜆
+𝑎 는 각각 하향대기복
+사와 대기경로복사를 나타낸다. 𝜀𝜆 는 방출율, 𝑇𝑠 는 지표면 온도를 나타낸다. 위 식에서 
+보는 바와 같이 위성자료로부터 지표면온도를 계산하는 과정에서 반드시 대기의 영향을 
+고려해야 한다. 이를 위해 1) 대기경로복사(𝐿𝜆
+𝑎), 2) 대기 경로 투과율(τ𝜆), 3) 하향 복사
+량(𝐿𝜆
+𝑑) 및 4) 지표면의 방출율을 정확하게 알아야 하며 위성 천정각 또한 고려해야 한
+다. 따라서 식 (2.7)을 실제 대기에 적용하기 위해서는 투과율 등과 같은 대기의 광학 
+속성을 알아야 한다. 대기 광학 속성은 온도와 습도 그리고 미량기체 농도로 대표되는 
+대기의 연직 구조에 따라 변한다. 대기 연직구조 및 지표면 온도, 방출율이 주어진 상태
+에서 복사전달 모델 모의를 수행하면 대기경로복사, 하향대기복사, 투과율에 대해 계산
+할 수 있으므로 주어진 대기 및 지표면 조건에 따라 대기 상단에서의 각 파장 별 단색복
+사휘도를 계산할 수 있다.  
+일반적으로 위성에 탑재된 센서에서는 측정값의 안정도와 정확도 향상을 위해 단위 파장
+이 아닌 일정 구간의 파장역에 대해 측정을 한다. 이 때 각 채널마다 파장별로 센서가 
+반응하는 정도를 나타내는 분광반응함수(Spectral Response Function: SRF) 가 주어지
+며 복사전달모델로 모의된 단색복사휘도와 SRF를 이용하여 각 채널의 가중평균 복사량
+8 
+ 
+을 식 (2.8)과 같이 계산한다. 
+𝐿𝑚𝑒𝑎𝑠𝑢𝑟𝑒𝑑 =
+∫ 𝐿𝜆𝑓(𝜆)𝑑𝜆𝜆2
+𝜆1
+∫ 𝑓(𝜆)𝑑𝜆𝜆2
+𝜆1
+         (2.8) 
+ 
+여기서 𝐿𝑚𝑒𝑎𝑠𝑢𝑟𝑒𝑑는 위성에서 측정된 복사량이며 𝑓(𝜆)는 분광반응함수, 𝐿𝜆 는 각 파장 별 
+단색복사휘도를 의미한다. 이렇게 구해진 복사량을 플랑크 방정식의 역 변환을 통해 각 
+채널 별 휘도 온도를 계산할 수 있다. 
+위의 식 (2.7)과 같이 기상위성에서 측정한 각 채널 별 휘도 온도 자료로부터 지표면온
+도를 정확히 산출하기 위해서는 1) 각 채널의 지표면 방출율 정보가 필요하며, 2) 지표
+면에서 방출된 복사 에너지가 대기 상단에 도달하기 전 통과해야 하는 대기의 특성 즉, 
+각 채널 별 대기의 투과율이 필요하며, 3) 대기의 각 층도 온도에 따라 에너지를 방출함
+으로 대기경로상의 채널 별 복사에너지 방출량 정보 또는 기온과 습도의 연직 프로파일 
+정보가 필요하다. 따라서 2개 이상의 다중 채널의 자료를 이용함에도 불구하고 방정식보
+다 미지수가 많기 때문에 몇몇의 가정이 반드시 필요하다. 일반적으로 지표면온도의 시
+공간적 변동에 비해 지표면 방출율의 변동성이 작기 때문에 많은 경우, 특히 현업 측면
+에서 지표면온도를 산출하는 알고리즘 개발에서는 지표면 방출율을 이미 알고 있다고 가
+정하고 지표면온도 산출 알고리즘을 개발한다(Hook et al., 1992; Li et al., 1999). 
+위성에서 측정된 채널 별 복사휘도 온도로부터 지표면온도를 추정하는 방법에는 단일채
+널방법, 분리대기창 방법 및 다중 채널 방법 등이 있다. 대부분의 지표면온도 산출 알고
+리즘들은 분리대기창 기법을 사용하는데 이는 지표면의 방출율을 알고 있다고 가정하며 
+두 채널에서 대기에 의한 흡수정도가 다름을 이용하여 대기의 효과를 제거할 수 있다고 
+가정한다(Becker and Li, 1990; Wan and Dozier, 1996; Li et al., 2013; Xu et al., 2014; 
+Tang et al., 2015). 특히 분리대기창 방법을 이용하면 수증기에 의한 대기영향을 보정할 
+수 있고 적용 방법이 매우 간단하기 때문에 많은 현업기관에서 사용되고 있다(Yu et al., 
+2009; Sobrino et al., 2013; Cho and Suh 2013b; Xu et al., 2014). 본 연구에서 사용한 
+분리대기창 기법은 식 (2.9)과 같다. 
+𝐿𝑆𝑇 = 𝐶0 + 𝐶1𝐵𝑇𝑐ℎ13 + 𝐶2(𝐵𝑇𝑐ℎ13 − 𝐵𝑇𝑐ℎ15) − 𝐶3(𝑠𝑒𝑐𝜃 − 1) + 𝐶4(1 − 𝜀̅) − 𝐶5∆ε   (2.9) 
+ 
+식 (2.9)에서 𝐶0~𝐶5 는 산출 계수를 의미하며 𝐵𝑇𝑐ℎ13 은 채널 13의 휘도 온도, 𝐵𝑇𝑐ℎ13 −
+𝐵𝑇𝑐ℎ15 는 채널 13과 채널 15의 휘도 온도 차(Brightness Temperature Difference: 
+BTD), 𝜃 는 GK-2A/AMI의 위성 천정각, 𝜀̅는 채널 13과 채널 15의 평균 지표면 방출
+율, 그리고 ∆ε은 두 채널의 지표면 방출율 차이를 의미한다.  
+9 
+ 
+2.4.1 복사전달모델 모의 및 과정 
+미 공군(U.S. Air Force)에서 개발한 MODTRAN 4.2(moderate resolution 
+transmission model) 는 밴드모델 모수화를 적용한 복사전달모델(Radiative Transfer 
+Model, RTM) 로 대기 투과율 및 복사휘도, 복사수지를 자외선 파장역부터 적외 영역
+(0.2 ~ 10,000.0 nm) 까지 계산할 수 있다(Berk et al. , 1999). MODTRAN4.2 는 
+HITRAN(high-resolution transmission molecular absorption database) 을 기반으로 
+개발되었으며 파수 분해능이 0.1으로 향상되었다. LOWTRAN(low resolution 
+transmission model) 기반이 일부 포함되어 있으며 분자산란, 구름, 안개, 비 등의 흡수
+/산란이 포괄적으로 고려된다. MODTRAN4.2에 대한 자세한 정보는 Berk et al. (1999)
+에 기술되어 있다.  
+해수면 온도와 달리 지표면온도는 위성자료와 1:1 대응되는 현장 관측 자료가 거의 없
+는 관계로 위성 자료로부터 지표면온도를 산출하기 위해서는 현장 관측 match-up 
+database 와 유사한 자료를 준비하여야 한다. 현재 이러한 자료를 준비하는 방법으로는 
+수치모델 자료를 이용하거나 복사전달모델 (RTM)을 이용한다. 수치모델의 경우 고해상
+도의 다양한 자료를 이용할 수 있는 장점이 있는 반면 정확도가 낮은 문제점이 있고 복
+사전달 모델을 이용할 경우 고해상도와 짧은 주기의 기온과 습도의 프로파일 및 방출율 
+자료를 확보하기가 어려운 문제점이 있다. 본 연구에서는 현재 이 분야 복사전달 모의에
+서 많이 활용되고 있는 MODTRAN 4.2 를 이용하여 모의자료를 만들어 지표면온도 산출 
+알고리즘을 개발하였다.  
+복사전달모델 모의에 입력 자료로 들어가는 SeeBor version 5 대기 연직 프로파일의 경
+우 대기 연직 기둥에 대해 주어진 101개 기압 층의 기온, 수증기량 등의 변수들이 제시
+되어 있다(Borbas et al., 2005). 또한 각 지점의 지면 피복에 따라 10개 파장역에 대한 
+CIMSS 지표면 방출율도 함께 포함되어 있다. SeeBor 프로파일에는 지표면온도가 1개
+로 정의되어 있으나 지면 피복, 계절 및 날씨에 따라 다양하게 변하는 지표면온도의 일 
+변동을 복사전달모의에서 고려하기 위해 선행 연구들(Wan, 1999; Yu et al., 2005; Cho 
+and Suh, 2013b; Choi and Suh, 2016; Choi and Suh, 2018; Yamamoto et al., 2018)에
+서 사용한 실험설계를 결합하여 Fig. 2.2 와 같이 기온과 지표면온도의 일 변동을 반영하
+였다. 
+ 
+ 
+10 
+ 
+ 
+Fig. 2.2와 같이 지표면온도의 일 변동은 기온을 기준으로 낮의 경우 LSTday = Ta −
+2⁡K⁡~⁡Ta + 20⁡K, 밤의 경우 LSTngt = Ta − 6⁡K⁡~⁡Ta + 2⁡K 로 따로 나누어 처방하였다. 또한 
+각 관측소에서 측정된 기온(Ta) 또한 실제로 일 변동을 하기 때문에 지표면온도처럼 
+Ta` = Ta + (LST − Ta)/2 와 같이 일 변동을 한다고 가정하여 복사전달모델에 처방하였다. 
+주어진 지표면온도와 대기조건에 따른 대기 상단에서의 각 채널 별 복사 휘도에 대한 모
+의자료를 생성하기 위해 Table 2.4 에 제시한 바와 같이 다양한 대기와 지면 상태를 고
+려하여 복사전달모델 모의를 수행하였다. 전 지구에 대해 15,704개의 기후학적 대기 및 
+지면 상태를 포함한 SeeBor 프로파일 자료 중에서 위성 천정각이 50도 이내인 2694개 
+관측소 자료를 사용하였다. 지표면 방출율은 지면 피복의 종류 및 파장에 따라 방출율이 
+조금씩 다르기 때문에 GK-2A/AMI 관측영역의 채널 13과 채널 15의 방출율의 분포를 
+분석하고 이를 복사전달모델에 고려하였다. 낮 시간에는 3,911,688개의 모의 자료
+(2694(station) * 12(LST) * 11( 𝜀𝑐ℎ13) * 11( ∆𝜀))가 구축되었으며, 밤 시간에 대해서는 
+1,629,870개의 모의자료(2694(station) * 5(LST) * 11(𝜀𝑐ℎ13) * 11(∆𝜀))가 구축되었다. 
+복사전달모델에 입력된 지표면온도와 두 채널의 지표면 방출율, 위성 천정각과 복사전달
+모델 모의를 통해 계산된 두 채널의 복사휘도로부터 산출된 휘도 온도 사이의 선형 회귀 
+분석을 통해 지표면온도 산출 계수를 결정하였다. 
+ 
+ 
+Fig. 2.2. Diurnal variation of air temperature and LST in the atmospheric vertical profiles (blue line: 
+SeeBor profile, red line: diurnal variation of profiles, yellow arrow: diurnal variation of air temperature, 
+green arrow: diurnal variation of LST). 
+11 
+ 
+Table 2.4. Input conditions of the radiative transfer model simulations. 
+Subject Conditions 
+Atmospheric Profile 
+2694 SeeBor database (Version 5) 
+(Viewing zenith angle less than 50°) 
+Land Surface Temperature 
+Day: Ta-2K ~ Ta+20K (a step of 2 K) 
+Night: Ta–6K ~ Ta+2K (a step of 2 K) 
+Air Temperature (under the PBL 
+Height) 
+Ta’ = Ta + (LST – Ta)/2 
+Emissivity 
+𝜺𝒄𝒉𝟏𝟑 :  0.9400 ~ 0.9900  
+(a step of 0.005, 11 steps) 
+-0.02 ≤ Δε ≤ 0.01 (a step of 0.003, 11 steps) 
+if (𝜺𝒄𝒉𝟏𝟓) > 1, 𝜺𝒄𝒉𝟏𝟓= 0.9999 
+ 
+2.5 수학적 설명 
+이 절에서는 AMI 자료와 보조 자료를 이용하여 지표면온도를 산출하는 과정에서 사용
+되는 산출 식에 대해 설명한다. 본 연구에서는 주간/야간과 대기의 상태에 따라 6개의 
+지표면온도 산출 식을 개발하였다. 대기의 창 채널의 경우 가중함수가 지표면에서 가장 
+크기 때문에 대기상단에서의 복사 전달 모의된 복사 휘도에 미치는 영향도 지표면온도의 
+영향이 가장 큰 점을 고려하기 위해 주간에는 지표면온도가 기온보다 높으므로 (Ta − 2) 
+K에서 (Ta + 20) K 을 주간으로 하였고 야간에는 반대로 지표면온도가 기온보다 낮으므
+로 (Ta − 6) K 에서 (Ta + 2) K 을 야간으로 처방하였다. 또한 분리대기창 채널의 경우 수
+증기에 대한 민감도가 대기 중 수증기량에 따라 상이한 점을 반영하기 위하여 두 채널 
+휘도 온도 차(Brightness Temperature Difference: BTD)가 0 K 이하일 경우 일반적으
+로 수증기량이 적거나 에어로졸이 우세하므로 ‘건조’, 7 K 이상일 경우 수증기량이 우세
+하므로 ‘습윤’, 0 K 에서 7 K까지 ‘보통’ 알고리즘으로 구분하였다(Table 2.5). 즉, 지표면
+온도의 산출 정확도 향상을 위해 기온 감률과 수증기 및 에어로졸 조건에 따라 총 6개 
+(2개(주간, 야간) × 3개(건조, 보통, 습윤))의 세부 산출식을 개발하였다 (식 2.10 ~ 식 
+2.15). 
+ 
+𝐿𝑆𝑇𝑑𝑎𝑦/𝑑𝑟𝑦 = 4.2916 + 0.9858𝐵𝑇𝑐ℎ13 + 1.5277(𝐵𝑇𝐷) − 0.3886(𝑠𝑒𝑐𝜃 − 1) +
+45.1436(1 − 𝜀̅) − 91.0634∆ε      (2.10) 
+12 
+ 
+𝐿𝑆𝑇𝑑𝑎𝑦/𝑛𝑜𝑟𝑚𝑎𝑙 = 7.4023 + 0.9690𝐵𝑇𝑐ℎ13 + 1.556(𝐵𝑇𝐷) + 1.2167(𝑠𝑒𝑐𝜃 − 1) +
+57.2157(1 − 𝜀̅) − 80.6132∆ε      (2.11) 
+ 
+𝐿𝑆𝑇𝑑𝑎𝑦/𝑚𝑜𝑖𝑠𝑡 = 77.1084 + 0.7167𝐵𝑇𝑐ℎ13 + 2.4035(𝐵𝑇𝐷) + 2.7208(𝑠𝑒𝑐𝜃 − 1) +
+64.9535(1 − 𝜀̅) − 82.512∆ε       (2.12) 
+ 
+𝐿𝑆𝑇𝑛𝑔𝑡./𝑑𝑟𝑦 = 8.7856 + 0.9690𝐵𝑇𝑐ℎ13 + 1.4719(𝐵𝑇𝐷) − 0.2857(𝑠𝑒𝑐𝜃 − 1) +
+45.6327(1 − 𝜀̅) − 82.966∆ε       (2.13) 
+ 
+𝐿𝑆𝑇𝑛𝑔𝑡./𝑛𝑜𝑟𝑚𝑎𝑙 = 4.8536 + 0.9535𝐵𝑇𝑐ℎ13 + 1.3772(𝐵𝑇𝐷) + 1.0791(𝑠𝑒𝑐𝜃 − 1) +
+49.9924(1 − 𝜀̅) − 57.0298∆ε      (2.14) 
+ 
+𝐿𝑆𝑇𝑛𝑔𝑡./𝑚𝑜𝑖𝑠𝑡 = 50.5596 + 0.8098𝐵𝑇𝑐ℎ13 + 2.2161(𝐵𝑇𝐷) + 2.1288(𝑠𝑒𝑐𝜃 − 1) +
+64.2628(1 − 𝜀̅) − 77.2555∆ε      (2.15) 
+ 
+Table 2.5. Summary of the LST retrieval equations according to the BTD ranges. The number indicates 
+the equation number in the text. 
+Conditions BTD ranges LST equation 
+Dry BTD < -1 (2.10) for Day, (2.13) for Night 
+Dry-Normal -1≤ BTD ≤ 1 
+Day: weighted sum of (2.10) and (2.11) 
+Night: weighted sum of (2.13) and (2.14) 
+Normal 1 < BTD < 6 (2.11) for Day, (2.14) for Night 
+Normal-Wet 6 ≤ BTD ≤ 8 
+Day: weighted sum of (2.11) and (2.12) 
+Night: weighted sum of (2.14) and (2.15) 
+Wet BTD > 8 (2.12) for Day, (2.15) for Night 
+ 
+위 식들 (2.9 ~ 2.14)에서 𝐵𝑇𝑐ℎ13은 채널 13의 휘도 온도, 𝐵𝑇𝐷는 채널 13과 채널 15의 
+BTD, 𝜃는 GK-2A/AMI의 위성 천정각, 𝜀̅는 채널 13과 채널 15의 평균 지표면 방출율, 
+그리고 ∆ε은 두 채널의 지표면 방출율 차이를 의미한다. 개발된 알고리즘은 주간과 야간
+에 적용이 용이하나 황혼 및 여명기에 알고리즘 간 차이로 인해 시간적 불연속이 발생할 
+수 있다. 이를 해소하기 위해 각 화소 별 태양 천정각 (Solar Zenith Angle: SoZA) 이 
+80°에서 100°사이일 때 황혼 및 여명기라 가정하였다. 개발된 주간 및 야간 알고리즘 
+간 불연속을 해소하기 위하여 다음 식 (2.16 ~ 2.17)와 같이 SoZA을 고려하여 선형으
+로 가중 조합을 하였다. 
+13 
+ 
+𝐿𝑆𝑇 = 𝑤 × 𝐿𝑆𝑇𝑑𝑎𝑦−𝑤𝑐 + (1 − 𝑤) × 𝐿𝑆𝑇𝑛𝑔𝑡.−𝑤𝑐  (2.16) 
+𝑤 = − 1
+20 × (𝑆𝑜𝑍𝐴) + 5⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡⁡(80° ≤ 𝑆𝑜𝑍𝐴 ≤ 100°) 
+𝑤 = 1.0         (𝑆𝑜𝑍𝐴 ≤ 80°) 
+𝑤 = 0.0         (𝑆𝑜𝑍𝐴 ≥ 100°)  (2.17) 
+ 
+위 식 2.15과 식 2.16에서 𝑤 는 가중치를 의미하고 𝐿𝑆𝑇𝑑𝑎𝑦−𝑤𝑐 와 𝐿𝑆𝑇𝑛𝑔𝑡.−𝑤𝑐 은 각각 주
+간과 야간에 수증기 조건에 따라 지표면온도 산출 알고리즘으로 산출된 지표면온도 값이
+다. 개발된 지표면온도 산출 알고리즘의 산출 수준을 평가할 때는 통계적 평가 측도인 
+상관계수, 편의(Bias), 평균 제곱근 오차(Root Mean Square Error: RMSE)를 이용하였
+다. 
+ 
+2.6. 복사전달모델(MODTRAN4) 모의 결과 
+지표면온도 산출 알고리즘을 평가하기 위해 복사전달모델에 입력된 기준 지표면온도와 
+알고리즘으로부터 추정된 지표면온도를 비교하였다. 이 때, 전체 구축된 복사모의 자료
+에 대해 지표면온도 산출에 영향을 미치는 각 요소별 RMSE를 분석하고자 분리대기창 
+기법 식(2.9)을 사용하여 Fig. 2.3에 나타냈다. 
+ 
+Fig. 2.3 은 복사전달모의에 입력된 기준 지표면온도와 복사전달 모의된 각 채널 별 휘도 
+온도로부터 하나의 회귀식으로 추정된 지표면온도에 대해 각 조건에 대해 RMSE의 분포
+를 의미한다. 해당 그림에서 하얀색으로 나타난 부분은 해당되는 범위에 복사 모의된 자
+Fig. 2.3. Distribution of RMSEs between LST calculated from RTM simulated brightness temperature 
+and reference LST according to different impacting factors: (a) brightness temperature differences 
+(BTD) and surface lapse rate; (b) emissivity differences (∆ε) and BTD; (c) satellite viewing zenith angle 
+(VZA) and BTD. 
+
+14 
+ 
+료가 없어 RMSE가 계산되지 않은 부분이며 녹색으로 갈수록 RMSE가 작고 붉은 색을 
+띌수록 RMSE가 커 정확도가 낮아지는 것을 나타낸다. 전반적인 특징은 다른 요소보다 
+휘도 온도차에 가장 민감하게 RMSE가 변화하였다. 특히 휘도 온도차가 7 K 보다 클 때 
+RMSE가 급격하게 증가하는 것을 확인할 수 있다. 또한 0 K보다 작을 때도 RMSE가 증
+가하는 것이 확인되었다. 이로 인해 앞서 2.5절 수학적 설명에서 언급하였듯 대기상단에
+서의 복사 전달 모의된 복사 휘도에 미치는 영향이 두 채널의 휘도 온도차에 가장 민감
+하므로 0 K 과 7 K 을 경계 값으로 설정하여 건조/보통/습윤의 조건으로 나누어 주간과 
+야간에 대해 회귀식을 도출하였다.  
+결정된 여섯 개의 지표면온도 산출 회귀식은 식(2.9 ~ 2.14)와 같으며 이를 적용하여 기
+준 지표면온도와 추정된 지표면온도의 산점도와 편의의 분포를 Fig. 2.4에 나타내었다. 
+복사전달모의에 처방된 기준 지표면온도와 각 채널 별 모의 휘도 온도 자료를 이용하여 
+도출된 지표면온도 산출 회귀식으로 추정된 지표면온도는 240 K 에서 340 K 의 넓은 범
+위에 대해 서로 잘 일치하고 있다. 두 지표면온도 간 상관계수는 0.998, 편의가 0.086 
+K, 그리고 RMSE가 1.024 K으로 나타나 개발된 산출 식으로부터 지표면온도가 잘 추정
+되고 있음을 확인할 수 있다. 산점도에서 나타났듯이 270~295 K의 구간에서는 기준 지
+표면온도보다 일부 과대 추정하였으며 310 ~ 32 5 K의 구간에서는 기준 지표면온도에 
+비해 회귀 식으로 추정된 지표면온도가 일부 과소 및 과대 추정되는 문제점이 나타났다. 
+편의의 빈도 분포 그래프에서는 0 K 을 기준으로 밀집되어 대칭에 가까운 정규분포를 나
+타냈으며 계통적 오차는 나타나지 않고 있다. 
+Fig. 2.4. (a) Scatter plot (left) and (b) histogram (right) of difference between the reference LST and 
+estimated LST using GK-2A/AMI retrieval algorithm. 
+
+15 
+ 
+ 
+Fig. 2. 5는 지표면온도의 산출 정확도에 영향을 미치는 인자들 (기온감률, 휘도온도차, 
+지표면 방출율 차, 위성 천정각) 에 따라 기준 지표면온도와 추정된 지표면온도 사이의 
+RMSE의 분포를 나타냈다. 전반적인 특징으로는 휘도 온도 차가 7 K 이상일 때 RMSE
+가 크게 나타나 산출 정확도가 떨어지는 점이다. 휘도온도차는 분리대기창의 두 채널이 
+에어로졸(Ch. 13) 및 수증기(Ch. 15) 에 각각 상이하게 민감하여 큰 양수와 음수 값은 
+각각 대기 중 수증기량이 많거나 에어로졸이 많은 상태를 의미한다. 또한 위성 천정각이 
+40도 이상이면서 휘도온도차가 8 K 보다 클 때 RMSE의 값이 다른 조건에 비해 큰 값
+을 보이는 것을 확인할 수 있는데 위성 천정각이 커질수록 대기 통과길이가 길어져 대기
+의 영향이 증가되는 점과 수증기의 영향이 복합적으로 작용한 결과로 판단된다. 
+ 
+2.7. 산출물 
+지표면온도 산출 알고리즘의 출력자료는 크게 지표면 온도를 나타낸 자료(GK-2A/AMI 
+관측 영역)와 산출자료의 품질에 대한 자료이다. 지표면온도는 10분 주기이므로 시간 
+당 여섯 번 알고리즘 수행이 되어야 한다. 최종 산출물의 구조는 Table 2.6와 같다. 
+ 
+Fig. 2.5. Distribution of RMSEs for the LST retrieval algorithms based on the different impacting 
+factors: (a) BTD and surface lapse rate; (b) ∆𝜺 and BTD; (c) ∆𝜺 and surface lapse rate; (d) VZA and 
+BTD; (e) VZA and surface lapse rate. 
+16 
+ 
+Table 2.6. LST retrieval algorithm output data. 
+Product name Type Name Description 
+LST short long_name AMI L2 Land Surface Temperature 
+_Unsigned TRUE 
+_FillValue 65535 
+Valid_max 33000 
+Valid_min 21300 
+scaling_factor 0.01 
+add_offset 0 
+units K 
+DQF_LST byte long_name AMI L2 Land Surface Temperature data quality flags 
+_Unsigned TRUE 
+_FillValue 255 
+Valid_max 4 
+Valid_min 0 
+units none 
+flag_meanings 0: normal 
+1: abnormal – satellite data receiving error 
+2: abnormal – auxiliary data error 
+3: abnormal – cloud mask data error 
+4: abnormal – exceeds the valid range of LST 
+17 
+ 
+ 
+ 
+Fig. 2.6은 2019년 6월 5일 0230 UTC의 GK-2A/AMI Level 1B 관측 자료와 Level 2 
+자료 (구름탐지, 지표면 방출율)를 이용하여 산출된 지표면온도의 공간분포이다. 지표면
+온도는 지리적 위치 및 지형에 따라 공간적으로 다르게 나타났으며 특히 중국과 몽고 국
+경지역과 호주 사막지역 등 건조한 지역에서 지표면온도가 상대적으로 높게 나타나고 있
+다. 또한 중국, 동남아, 인도지역과 호주 북부지역에서는 구름으로 인해 지표면온도가 산
+출되지 않았다. 
+  
+Fig. 2.6. Sample images of the GK-2A land surface temperature from GK-2A full disk scan data for the 
+selected day (June 5, 2019, 0230 UTC). 
+18 
+ 
+3. 모의자료 및 검증 
+3.1 모의 입력자료 및 검증자료 
+아직 GK-2A/AMI 자료를 사용할 수 없기 때문에 본 알고리즘에서는 GK-2A와 궤도 
+특성이 같으며 위치도 근접한 Himawari-8/AHI 자료를 대체 입력 자료로 활용하였다. 
+앞에서 설명한 바와 같이 분리대기창 기법을 사용하여 지표면온도를 개발할 때는 두 개
+의 인접한 적외 채널을 사용한다. 본 연구에서는 Himawari-8/AHI 채널 13과 채널 15
+의 관측 자료를 사용하였다.  
+지표면온도는 청천인 육지 화소에 대해서만 산출되므로 구름탐지 자료가 필요하다. 구름 
+탐지 산출물의 경우 현재 국가기상위성센터에서 개발 중인 GK-2A 구름 탐지 알고리즘
+(v0531)을 Himawari-8 자료에 적용하여 산출된 자료를 제공받아 사용하였다(Lee et 
+al., 2016; NMSC, 2018). 구름탐지 산출물의 시간해상도는 10분이며 공간해상도는 2 
+km이다. 또한 분리대기창 기법을 적용하여 지표면온도를 산출할 때는 두 채널의 지표면 
+방출율을 미리 알고 있다고 가정하기 때문에 선행 산출된 지표면 방출율 자료가 필요하
+다. 지표면 방출율 자료는 GK-2A 지표면 방출율 산출 알고리즘(v0511)을 
+Himawari-8 자료에 적용하여 산출된 자료를 사용하였으며 지표면 방출율 산출에는 식
+생지수와 적설탐지 자료의 산출이 선행되어야 한다. 지표면 방출율 자료의 공간 및 시간
+해상도는 각각 2 km 와 8일 합성 주기이다. 지표면온도 산출을 위해 필요한 보조 자료는 
+육지/해양 구분자료, 지표면온도 산출 계수 그리고 각 화소에 대한 위치정보(위도, 경도) 
+및 각도정보(태양 천정각, 위성 천정각) 자료가 필요하다. 
+산출된 지표면온도를 검증할 수 있는 GK-2A 관측영역 내 가용 가능한 현장 관측 자료
+의 수가 제한적이다. 지표면온도 검증에 사용된 현장관측 자료는 Baseline Surface 
+Radiation Network(BSRN) 중에서 일본의 Tateno 지점에서 관측된 상향 장파 복사 자
+료를 사용하였다(Ijima, 2017). 국립기상과학원에서 제공하고 있는 보성 글로벌 표준 기
+상관측소에서 측정된 2.6m, 60m 상향 장파 복사 자료도 지표면온도 검증을 위해 사용
+하였다. 상향 장파 복사 자료의 경우 이를 Stefan-Boltzmann 법칙으로 지표면온도로 
+변환하여 검증에 사용하였다. 현장 관측 자료의 경우 공간대표성의 한계가 존재하므로 
+타 위성에서 산출된 지표면온도를 비교 검증자료로 사용하였다.  
+ 
+3.2 검증 방법 
+대체 입력 자료(Himawari-8)로부터 산출된 지표면온도를 비교 검증하기 위해 MODIS 
+지표면온도(MOD11_L2, MYD11_L2 swath collection 6) 를 사용하였다(NASA LP 
+19 
+ 
+DAAC, 2013). 지표면온도는 시간적 변동이 매우 크기 때문에 검증하고자 하는 시간대
+에서 ± 5분 이내의 MODIS 지표면온도 자료를 이용하여 검증을 실시하였다. 또한 모의 
+입력 자료인 Himawari-8 채널 13, 15 의 공간해상도가 2 km 인데 비해 MODIS 지표면
+온도의 공간해상도는 1 km 로 다르기 때문에 Himawari-8 화소에서 가장 가까운 
+MODIS 화소를 중심으로 9(3×3) 픽셀에 대해 5개 이상이 청천이면서 정상 산출된 화
+소일 때 이를 단순 평균하여 검증에 사용하였다. 현장 관측자료의 경우 동일 시간대이면
+서 모의 입력 자료인 Himawari-8 화소에서 가장 가까운 화소를 이용하여 검증을 실시
+하였다. 
+ 
+3.3 검증 결과 
+Fig. 3.1부터 Fig. 3.4는 지표면온도 산출 알고리즘을 Himawari-8/AHI 자료에 적용하
+여 산출된 지표면온도와 MODIS 지표면온도 그리고 두 자료 간의 차이의 공간분포와 산
+점도를 나타낸 것이다. 앞에서 언급한 시공간 일치 조건을 만족하는 화소 만을 비교하였
+다. 따라서 공간분포 상에 MODIS의 경로에 따른 불연속이 존재하고 있다. 그림에서 보
+는 바와 같이 계절 및 주야에 관계없이 Himawari-8 지표면온도와 MODIS 지표면온도 
+공간분포가 유사할 뿐만 아니라 두 온도 간의 차가 ± 4 K 이내로 분포하고 있다. 4 개의 
+사례에서는 Himawari-8 지표면온도와 MODIS 지표면온도 간의 상관계수가 0.9 이상
+으로 나타났으며 bias와 RMSE 모두 2 K 이하로 작게 나타났다. 
+20 
+ 
+ 
+ 
+Fig. 3.1. (a) Spatial distribution of Himawari -8 LST (top left), (b) MODIS LST (top right), (c) their 
+differences (bottom left) and (d) scatter plot (bottom right) for the selected day  (Nov. 21, 2016, 1300 
+UTC). 
+
+21 
+ 
+  
+Fig. 3.2. Same as Fig. 3.1 except for the selected day (Jan. 25, 2017, 0300 UTC). 
+22 
+ 
+  
+Fig. 3.3. Same as Fig. 3.1 except for the selected day (Apr. 5, 2017, 0100 UTC). 
+
+23 
+ 
+ 
+다양한 경우에 대해 산출 알고리즘의 성능을 평가하기 위하여 2016 년 11 월, 2017 년 1, 
+4, 7 월 총 4 개월에 대해 지표면온도를 산출하여 MODIS 지표면온도와 비교 검증을 
+하였으며 그 결과는 Table 3.1 에 나타냈다. 두 지표면온도의 상관계수는 4 개 달 
+모두에서 야간보다 주간에 높게 나타났다. 편의의 경우 주간에는 여름인 2016 년 
+11 월에만 –0.23 K 의 한랭 편의가 나타났으나 그 외의 달에서는 온난 편의가 나타났다. 
+반면 야간의 경우 주간과는 다르게 전반적으로 모든 월에서 한랭 편의가 나타났으며 그 
+크기가 –0.3 K 이하를 보였다. RMSE 의 경우 전반적으로 야간보다 주간에 큰 값을 
+보였으며, 특히 2016 년 11 월의 경우 RMSE 가 2.53 K 으로 목표 정확도인 2.5 K 에 
+비해 조금 크게 나타났다. 반면 야간의 RMSE 는 4 개 월 모두 1.3 K 보다 작게 
+Fig. 3.4. Same as Fig. 3.1 except for the selected day (Jul. 6, 2017, 1800 UTC). 
+24 
+ 
+나타났다. 주간과 야간 시간대를 모두 합한 265 개 장면에 대한 결과에서는 상관계수가 
+0.92, 편의는 0.2 K RMSE 는 1.78 K 으로 나타나 산출수준이 우수함을 보였다. 
+ 
+Table 3.1. Comparison results of Himawari -8 LST data and MODIS LST product (collection 6) for 
+months (November 2016, January, April, and July 2017). 
+Month 
+Day Night Total (Day+Night) 
+# of 
+scene Corr. Bias 
+[K] 
+RMSE 
+[K] 
+# of 
+scene Corr. Bias 
+[K] 
+RMSE 
+[K] 
+# of 
+scene Corr. Bias 
+[K] 
+RMSE 
+[K] 
+2016.11 40 0.91 -0.23 2.53 35 0.90 -0.10 1.02 75 0.91 -0.18 1.97 
+2017.01 24 0.89 0.20 2.22 18 0.87 -0.19 1.18 42 0.88 0.05 1.82 
+2017.04 38 0.94 0.68 2.02 31 0.87 -0.27 1.08 69 0.92 0.45 1.79 
+2017.07 46 0.96 0.59 1.72 33 0.90 -0.12 1.23 79 0.95 0.42 1.60 
+Total 
+and Ave. 148 0.93 0.35 2.06 117 0.89 -0.15 1.12 265 0.92 0.20 1.78 
+ 
+또한 산출된 Himawari-8/AHI 지표면온도의 정량적인 검증을 위해 현장관측 자료인 
+BSRN 과 보성 글로벌 표준 기상 관측소의 상향 장파 복사량을 검증자료로 사용하였다. 
+BSRN 중 일본의 Tateno 지점에서 관측된 상향 장파 복사량을 지표면온도로 변환하여 
+Fig. 3.5. Scatter plot between Himawari-8 LST and Tateno station from upward longwave radiation (red 
+square symbol: daytime; blue circle symbol: nighttime). 
+25 
+ 
+검증한 결과를 Fig. 3.5 에 나타내었다. 437 개 사례에 대해 상관계수가 0.88, 편의가 -
+0.64 K, RMSE 는 2.6 K 를 보였다. 주간에는 Himawari-8 지표면온도가 현장관측 
+지표면온도에 비해 과소 추정되는 경향이 나타났다. 반면 야간에는 저온 구간(270~290 
+K)에서 Himawari-8 지표면온도가 현장 관측 지표면온도보다 과대 추정되었으며 290 
+K 이상에서는 과소/과대 추정이 혼재되어 있다. 
+보성 관측소에서 관측된 상향 장파 복사량을 지표면온도로 변환한 검증결과를 Fig. 
+3.6 에 나타냈다. 해당 자료의 시간해상도는 30 분 간격이므로 Himawari-8 관측 
+시간대와 동일 시간대의 자료를 사용하였다. 검증 기간은 2016 년 8 월 5 일부터 
+26 일까지의 자료를 사용하였다. 전반적으로 측정고도에 관계없이 현장 관측된 복사량을 
+지표면온도로 변환한 값보다 Himawari-8 지표면온도가 낮게 추정하였다. 또한 
+주간(150 개)과 야간(189 개)에 관계없이 Himawari-8 지표면온도가 현장 관측된 
+복사량을 지표면온도로 변환한 값보다 낮게 추정되고 있으며 특히 야간에 현저하게 낮게 
+추정하는 사례가 발생하였다. 현장 관측 자료를 이용한 검증을 실시할 때는 관측 지점 
+주변의 지면이 균질 하게 이루어져 있어야 하지만 가장 가까운 위성 화소의 
+공간해상도를 고려하였을 때 이를 만족하기 어려워 공간대표성의 한계가 존재한다. 또한 
+장기간의 추가 검증을 통해 알고리즘의 성능 평가가 필요하다. 
+ 
+ 
+Fig. 3.6. Scatter plot between Himawari -8 LST and Boseong observatory from (a) 2.6 m upward 
+longwave radiation and (b) 60m upward longwave radiation. 
+26 
+ 
+4. 현업운영 시 고려사항 
+4.1 수치계산 고려사항 
+지표면온도 산출 알고리즘은 일차적으로 구름탐지 및 지표면 방출율의 산출이 이루어진 
+후에 지표면온도 산출이 시작되도록 설계되었다. 이 알고리즘은 계산식이 단순하기 
+때문에 수치 계산 시 특별히 고려할 사항은 없다. 
+ 
+4.2 프로그래밍 및 절차상의 고려사항  
+지표면온도 산출 알고리즘은 지표면으로 구분된 화소 중 청천인 화소에 대해서만 
+계산된다. 따라서 지표면온도 알고리즘은 구름 마스킹 과정이 끝난 이후에 수행될 
+것이다. 
+ 
+4.3 품질 평가 및 진단  
+지표면온도 산출 알고리즘의 성능은 기온 자료를 포함된 기상청의 지상 관측 자료와 잘 
+검정된 타 위성 자료(MODIS LST) 를 이용하여 정기적으로 품질이 평가되어야 한다. 
+지표면온도의 통계적 평가 측도로는 편의(bias)와 평균 제곱근 오차(RMSE)를 이용할 
+것이다. 
+ 
+4.4 예외사항 처리  
+지표면온도 산출 알고리즘이 실행되기 전에 모든 채널과 보조 자료에 대하여 자료 및 
+품질자료가 존재하는지 알고리즘 수행 전에 확인되어야 한다. 지표면온도 산출 
+알고리즘은 각 화소에 대해 누락되거나 잘못된 품질의 채널 및 보조 자료를 flag 에 
+표시한다. 
+ 
+4.5 검증 알고리즘 
+지표면온도 산출 알고리즘의 성능을 평가하기 위해 GK-2A 관측 영역 내 가용 가능한 
+현장 관측 자료(BSRN, 보성 글로벌 표준 기상 관측소)와 잘 검정된 위성자료(MODIS 
+LST)를 이용한 검증 알고리즘 이용하여 평가할 것이다. 
+  
+27 
+ 
+5. 가정 및 제한 
+5.1 성능 
+지표면온도 산출 수준은 구름 마스킹 자료와 대기 및 지표면 정보(e.g. 지표면 방출율, 
+육지/바다 구분 자료, 지면 피복 자료)에 영향을 받는다. 또한 두 분리대기 창 채널의 
+복사 정확도와 네비게이션 정확도도 지표면온도 산출 수준에 영향을 미친다. 성능에 
+영향을 미치는 요인 중에서 구름 마스킹 자료와 방출율 자료는 지표면온도의 정확한 
+추정을 위해 가장 중요한 요소이다. 
+또한 지표면온도 산출에 사용되는 선행 자료인 지표면 방출율은 토양 수분에 큰 영향을 
+받는다. 하지만 GK-2A 의 관측영역에 대해 관측주기 및 공간해상도를 만족하는 토양 
+수분 자료가 전무한 실정으로 토양수분에 대한 고려를 하지 못하는 한계가 존재한다. 
+지표면온도 산출 알고리즘 버전 0441 으로 산출된 지표면온도를 1 년 간 MODIS 
+지표면온도를 이용하여 정확도를 평가하였을 때 상관계수는 0.94, 편의는 1.38 K, 
+그리고 RMSE 는 2.42 K 를 보였다. 전반적으로 산출된 두 지표면온도는 주간보다 
+야간에 더 유사한 공간분포를 보였다. 또한 주간과 야간을 모두 합친 결과에서는 
+겨울철(12, 1, 2 월)의 월간 편의와 RMSE 가 다른 계절보다 조금 더 크게 나타났다. 
+또한 SeeBor 프로파일을 이용하여 새로 개발한 지표면온도 알고리즘 버전 0541 으로 
+산출된 4 개월의 지표면온도를 MODIS 지표면온도와 비교분석한 결과 상관계수는 0.92, 
+편의는 0.2 K, RMSE 는 1.78 K 으로 나타났다. 이전 버전과 비교할 때, 상관계수는 약간 
+감소하였으나 편의와 RMSE 가 모두 감소되어 알고리즘 성능이 개선되었음을 확인할 수 
+있었다. 
+ 
+5.2 예상 센서 성능 
+지표면 온도 산출 알고리즘은 기본적으로 AMI 의 성능이 계획했던 조건을 충족할 
+것이라고 가정한다. 하지만 지표면온도는 구름 마스크, 안개탐지, 에어로졸 탐지 
+자료들과 같은 여러 산출물에 영향을 받을 것이다. 따라서 이러한 알고리즘의 성능을 
+저하시키는 모든 문제들은 지표면온도 산출 알고리즘에도 영향을 미칠 것으로 판단된다. 
+ 
+5.3 개선을 위한 사전 계획 
+지표면온도 산출 수준 향상을 위해 GK-2A/AMI 자료로부터 산출되는 최근의 
+식생지수(Normalized Difference Vegetation Index) 자료를 이용하여 다양한 유형의 
+지표면 정보(e.g. 지면 피복, 식생 비율, 지표면 방출율)를 도출하여 산출 알고리즘의 
+성능을 개선할 예정이다. 또한 GK-2A/AMI 의 현업 운영 전까지 지표면온도 
+산출계수의 미세 조정과 알고리즘 초기 성능 진단을 통해 알고리즘 최적화를 진행할 
+예정이다. 
+  
+28 
+ 
+6. 참고문헌 
+국가기상위성센터, 2015, 영상 장면분석/표면분야 알고리즘 개발 (1) 연차보고서 
+국가기상위성센터, 2016, 영상 장면분석/표면분야 알고리즘 개발 (2) 연차보고서 
+국가기상위성센터, 2017, 영상 장면분석/표면분야 알고리즘 개발 (3) 연차보고서 
+국가기상위성센터, 2017, 영상 장면분석/표면분야 알고리즘 개발 (4) 연차보고서 
+국가기상위성센터, 2018, 영상 장면분석/표면분야 알고리즘 개발 (5) 연차보고서 
+Becker, F., and Z. L. Li, 1990: Temperature-Independent Spectral Indices in Thermal Infrared 
+Bands. Remote Sensing of Environment, 32(1), 17-33. 
+Berk, A., G.P. Anderson, P.K. Acharya, J.H. Chetwynd, L.S. Bernstein, E. P. Shettle, M.W. 
+Matthew, and S. M. Adler -Golden, 1999: MODTRAN 4 users’ manual, report. Air 
+Force Research Laboratory Space Vehicles Directorate, Hascom AFB, Mass. 
+Borbas, E. E., Suz anne Wetzel Seemann, Hung -Lung Huang, Jun Li, and W. Paul Menzel, 
+2005: Global profile training database for satellite regression retrievals with estimates 
+of skin temperature and emissivity. Proceedings of the XIV. International ATOVS Study 
+Conference, Be ijing, China, University of Wisconsin -Madison, Space Science and 
+Engineering Center, Cooperative Institute for Meteorological Satellite Studies (CIMSS), 
+Madison, WI, 2005, 763-770. 
+Cho, A. R., and M. S. Suh, 2013b: Evaluation of Land Surface Temperature Op erationally 
+Retrieved from Korean Geostationary Satellite (COMS) Data. Remote Sensing, 5(8), 
+3951-3970. 
+Choi, Y. Y., and M. S. Suh, 2016: Improvement of COMS land surface temperature retrieval 
+algorithm by considering diurnal variation of air temperature, Korean Journal of 
+Remote Sensing, 32(5), 435-452(in Korean with English abstract). 
+Choi, Y. Y., and M. S. Suh, 2018: Development of Himawari -8/Advanced Himawari Imager 
+(AHI) land surface temperature retrieval algorithm, Remote Sensing, 10(12), 2013. 
+Hook, S. J., A. R. Gabell, A. A. Green, and P. S. Kealy, 1992: A comparison of techniques for 
+extracting emissivity information from thermal infrared data for geological studies. 
+Remote Sensing of Environment, 42, 123-135. 
+Ijima, O. 2017: Basic and other m easurements of radiation at station Tateno (2017 -07). 
+Aerological Observatory, Japan Meteorological Agency, PANGAEA, 
+https://doi.org/10.1594/PANGAEA.882538 (accessed on 17 November 2018) 
+Lee, B. I., S. R. Chung, and S. Baek, 2016: Development of cloud detection algorithm for GK-
+2A/AMI. The 7th Asia -Oceania/2nd AMS -Asia/2nd KMA Meteorological Satellite 
+User’s Conference, Songdo City, Republic of Korea, October 24-27, 2016. 
+Li, Z. L., F. Becker, M. P. Stoll, and Z. Wan, 1999: Evaluating six methods for extrac ting 
+29 
+ 
+relative emissivity spectra from thermal infrared images. Remote Sensing of 
+Environment, 69, 197-214. 
+Li, Z. L., B. H. Tang, H. Wu, H. Ren, G. Yan, Z. Wan, I. F. Trigo, and J. A. Sobrino, 2013: 
+Satellite derived land surface temperature: Current statu s and perspectives. Remote 
+Sensing of Environment, 131, 14-37. 
+McMillin, L. M., 1975: Estimation of sea surface temperature from two infrared window 
+measurements with different absorption. Journal of Geophysical Research , 80(36), 
+5113-5117. 
+NASA LP DAAC, 2 013, MOD11_L2: MODIS/Terra Land Surface Temperature and 
+Emissivity 5-Minute L2 Swath 1 km V006. USGS Earth Resources Observation and 
+Science (EROS) Center, Sioux Falls, South Dakota (https://lpdaac.usgs.gov), accessed 
+January 15, 2018, at http://dx.doi.org/10.5067/MODIS/MOD11_L2.006. 
+NASA LP DAAC, 2013, MYD11_L2: MODIS/Aqua Land Surface Temperature and 
+Emissivity 5-Minute L2 Swath 1 km V006.  USGS Earth Resources Observation and 
+Science (EROS) Center, Sioux Falls, South Dakota (https://lpdaac.usgs.gov), accessed 
+January 15, 2018, at http://dx.doi.org/10.5067/MODIS/MYD11_L2.006. 
+NMSC, 2018: GEO-KOMPSAT 2A Cloud Mask Algorithm Theoretical Basis Document 
+NMSC, 2018: GEO -KOMPSAT 2A Land Surface Emissivity Algorithm Theoretical Bas is 
+Document 
+Sobrino, J., J. Jiménez -Muñoz, C. Brockmann, A. Ruescas, O. Danne, P. North, ... and Z. 
+Mitraka, 2013: Land surface temperature retrieval from Sentinel 2 and 3 Missions. In 
+Proceedings of the Sentinel -3 OLCI/SLSTR and MERIS/(A) ATSR Workshop 15 –19 
+October 2012 Frascati, Italy. 
+Tang, B. H., K. Shao, Z. L. Li, H. Wu, F. Nerry, and G. Zhou, 2015: Estimation and validation 
+of land surface temperatures from Chinese second-generation polar-orbit FY-3A VIRR 
+data. Remote Sensing, 7(3), 3250-3273. 
+Wan, Z., and J. Dozier, 1996: A Generalized Split -Window Algorithm for Retrieving Land -
+Surface Temperature Measurement from Space. IEEE Transactions on Geoscience and 
+Remote Sensing, 34(4), 892-905. 
+Wan, Z. 1999: MODIS land -surface temperature algorithm theoretical basis document (LST 
+ATBD). Institute for Computational Earth System Science, Santa Barbara, 75. 
+Xu, H., Y. Yu, D. Tarpley, F. M. Göttsche, and F. S. Olesen, 2014: Evaluation of GOES -R 
+land surface temperature algorithm using SEVIRI satellite retrievals  with in situ 
+measurements. IEEE Transactions on Geoscience and Remote Sensing , 52(7), 3812-
+3822. 
+Yamamoto, Y., H. Ishikawa; Y. Oku, and Z. Hu, 2018: An algorithm for land surface 
+30 
+ 
+temperature retrieval using three thermal infrared bands of Himawari-8. Journal of the 
+Meteorological Society of Japan, Ser. II. 
+Yu, Y., J. L. Privette, and A. C. Pinheiro, 2005: Analysis of the NPOESS VIIRS land surface 
+temperature algorithm using MODIS data. IEEE Transactions on Geoscience and 
+Remote Sensing, 43(10), 2340-2350. 
+Yu, Y ., D. Tarpley, J. L. Privette, M. D. Goldberg, M. R. V . Raja, K. Y . Vinnikov, and H. Xu, 
+2009: Developing algorithm for operational GOES-R land surface temperature product. 
+IEEE Transactions on Geoscience and Remote Sensing, 47(3), 936-951. 
+ 
